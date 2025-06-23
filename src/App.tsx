@@ -332,6 +332,22 @@ export default function SneltoetsTrein() {
             ))}
           </ul>
         </div>
+         <button
+        className="mt-8 bg-[#003082] text-white px-4 py-2 rounded"
+        onClick={() => {
+          setStep(-1);
+          setPoints(0);
+          setPerQuestionStats([]);
+          setRanking(null);
+          setVerbetering(null);
+        }}
+        aria-label="Speel opnieuw"
+      >
+        Speel opnieuw!
+      </button>
+    </div>
+  );
+}
       </div>
     );
   }
