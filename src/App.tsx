@@ -348,10 +348,6 @@ export default function SneltoetsTrein() {
     </div>
   );
 }
-      </div>
-    );
-  }
-
   return (
     <div className="p-4 max-w-xl mx-auto text-[#003082]">
       <div className="relative w-full h-32 bg-[#003082] mb-6 overflow-hidden rounded-xl">
