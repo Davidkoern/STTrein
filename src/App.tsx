@@ -77,101 +77,22 @@ export default function SneltoetsTrein() {
   const current = questions[step] || {};
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // Focus management for accessibility
   useEffect(() => {
     if (!loggedIn && nameInputRef.current) {
       nameInputRef.current.focus();
     }
   }, [loggedIn]);
 
-  // Fetch leaderboard
   useEffect(() => {
     if (loggedIn && step === -1) {
       const fetchLeaderboard = async () => {
-        const { data, error } = await supabase
-          .from('scores')
-          .select('name, score')
-          .order('score', { ascending: false });
+        const { data, error } = await supabase.rpc('get_best_scores');
         if (!error && data) setLeaderboard(data as LeaderboardEntry[]);
       };
       fetchLeaderboard();
     }
   }, [loggedIn, step]);
 
-  // Keyboard handler
-  useEffect(() => {
-    if (!loggedIn || step < 0 || step >= questions.length) return;
-    readyRef.current = true;
-    attemptsRef.current = 0;
-    setGameMessage("");
-    startRef.current = Date.now();
-
-    const handler = (e: KeyboardEvent) => {
-      if (Date.now() - loginTimeRef.current < 300) return;
-      e.preventDefault();
-      if (!readyRef.current || processing || locked || ["Control", "Alt", "Meta", "Shift"].includes(e.key)) return;
-      readyRef.current = false;
-
-      const combo = normalizeCombo(e);
-
-      if (combo === current.combo) {
-        setLocked(true);
-        setProcessing(true);
-        const now = Date.now();
-        const elapsed = now - startRef.current;
-        const score = Math.floor((15000 - elapsed) / 1000);
-        const punten = Math.max(score, 0);
-
-        setPoints((prev) => prev + punten);
-        setPerQuestionStats((prev) => [...prev, {
-          vraag: current.description,
-          tijd: (elapsed / 1000).toFixed(1),
-          punten
-        }]);
-        setGameMessage("Goed! 🚆");
-
-        setTimeout(() => {
-          setGameMessage("");
-          setLocked(false);
-          setProcessing(false);
-          setStep((prev) => prev + 1);
-          attemptsRef.current = 0;
-          readyRef.current = true;
-        }, 1000);
-
-      } else {
-        attemptsRef.current += 1;
-        if (attemptsRef.current >= 2) {
-          setLocked(true);
-          setProcessing(true);
-          setGameMessage(`Antwoord: ${current.combo}`);
-
-          setTimeout(() => {
-            setPerQuestionStats((prev) => [...prev, {
-              vraag: current.description,
-              tijd: ">15",
-              punten: 0
-            }]);
-            setGameMessage("");
-            setLocked(false);
-            setProcessing(false);
-            setStep((prev) => prev + 1);
-            readyRef.current = true;
-          }, 2000);
-        } else {
-          setGameMessage("Probeer het opnieuw.");
-          setTimeout(() => {
-            readyRef.current = true;
-          }, 200);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [current, loggedIn, step, processing, locked, questions.length]);
-
-  // Save score when game ends
   useEffect(() => {
     if (step >= questions.length && username) {
       const saveScore = async () => {
@@ -181,11 +102,7 @@ export default function SneltoetsTrein() {
           details: perQuestionStats,
         });
 
-        const { data, error } = await supabase
-          .from('scores')
-          .select('name, score')
-          .order('score', { ascending: false })
-          .limit(5);
+        const { data, error } = await supabase.rpc('get_best_scores');
         if (!error && data) setLeaderboard(data as LeaderboardEntry[]);
       };
       saveScore();
