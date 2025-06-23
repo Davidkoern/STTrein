@@ -49,7 +49,6 @@ function normalizeCombo(event: KeyboardEvent): string {
   return keys.join("+");
 }
 
-// Initialize Supabase with environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
@@ -69,6 +68,8 @@ export default function SneltoetsTrein() {
   const [processing, setProcessing] = useState(false);
   const [perQuestionStats, setPerQuestionStats] = useState<PerQuestionStat[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [ranking, setRanking] = useState<number | null>(null);
+  const [verbetering, setVerbetering] = useState<number | null>(null);
 
   const startRef = useRef<number>(Date.now());
   const loginTimeRef = useRef(0);
@@ -82,6 +83,13 @@ export default function SneltoetsTrein() {
     }
     return null;
   }, [questions, step]);
+
+  useEffect(() => {
+    document.body.style.backgroundColor = '#FFC917';
+    document.body.style.color = '#003082';
+    document.body.style.textAlign = 'center';
+    document.body.style.margin = '0 auto';
+  }, []);
 
   useEffect(() => {
     if (!loggedIn && nameInputRef.current) {
@@ -175,6 +183,17 @@ export default function SneltoetsTrein() {
   useEffect(() => {
     if (step >= questions.length && username) {
       const saveScore = async () => {
+        const { data: previousScores } = await supabase
+          .from('scores')
+          .select('score')
+          .eq('name', username)
+          .order('score', { ascending: false })
+          .limit(1);
+
+        const previous = previousScores?.[0]?.score ?? null;
+        const verbetering = previous !== null ? points - previous : null;
+        setVerbetering(verbetering);
+
         await supabase.from('scores').insert({
           name: username,
           score: points,
@@ -182,7 +201,11 @@ export default function SneltoetsTrein() {
         });
 
         const { data, error } = await supabase.rpc('get_best_scores');
-        if (!error && data) setLeaderboard(data as LeaderboardEntry[]);
+        if (!error && data) {
+          setLeaderboard(data as LeaderboardEntry[]);
+          const index = data.findIndex((entry: LeaderboardEntry) => entry.name === username);
+          if (index !== -1) setRanking(index + 1);
+        }
       };
       saveScore();
     }
