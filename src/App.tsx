@@ -164,7 +164,20 @@ export default function SneltoetsTrein() {
       };
 
       window.addEventListener("keydown", handler);
-      return () => window.removeEventListener("keydown", handler);
+      return (
+  
+<style>{`
+  ul {
+    list-style: none !important;
+    padding-left: 0 !important;
+    text-align: center !important;
+  }
+  li {
+    text-align: center !important;
+  }
+`}</style>
+
+) => window.removeEventListener("keydown", handler);
     }
   }, [current, loggedIn, step, processing, locked, questions.length]);
 
