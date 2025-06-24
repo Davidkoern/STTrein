@@ -9,11 +9,9 @@ type LeaderboardEntry = { name: string, score: number };
 const ORIGINAL_QUESTIONS: Question[] = [
   { combo: "shift+enter", description: "E-mail openen in nieuw venster" },
   { combo: "ctrl+1", description: "Naar mail gaan in Outlook (vanuit je agenda)" },
-  { combo: "shift+pagedown", description: "Halve pagina naar beneden" },
   { combo: "ctrl+arrowright", description: "Cursus woord naar rechts" },
   { combo: "ctrl+y", description: "Actie herhalen" },
   { combo: "ctrl+end", description: "Naar einde document" },
-  { combo: "shift+pageup", description: "Halve pagina naar boven" },
   { combo: "ctrl+arrowleft", description: "Met cursor woord naar links" },
   { combo: "ctrl+2", description: "Naar je agenda gaan in Outlook (vanuit je mailbox)" },
   { combo: "ctrl+c", description: "Kopiëren van geselecteerde tekst of items" },
