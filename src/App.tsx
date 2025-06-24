@@ -278,7 +278,7 @@ export default function SneltoetsTrein() {
         <h2 className="text-xl font-semibold mb-2 text-[#003082]">Toetscombinaties die je gaat oefenen:</h2>
         <ul className="list-none text-center">
           {ORIGINAL_QUESTIONS.map((q, i) => (
-            <li key={i}><strong>{q.combo}</strong>: {q.description}</li>
+            <li className="text-center"><strong>{q.combo}</strong>: {q.description}</li>
           ))}
         </ul>
         <button
@@ -293,7 +293,7 @@ export default function SneltoetsTrein() {
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Alle scores:</h2>
           <ul className="list-none text-center">
             {leaderboard.map((entry, index) => (
-              <li key={index} className="border-b py-1">
+              <li key={index} className="text-center border-b py-1">
                 {index + 1}. {entry.name} – {entry.score} punten
               </li>
             ))}
@@ -315,7 +315,7 @@ export default function SneltoetsTrein() {
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">Overzicht per vraag:</h2>
           <ul className="list-none text-center">
             {perQuestionStats.map((stat, index) => (
-              <li key={index} className="border-b py-1">
+              <li key={index} className="text-center border-b py-1">
                 <strong>Vraag {index + 1}:</strong> {stat.vraag}<br />
                 Tijd: {stat.tijd} sec – Punten: {stat.punten}
               </li>
@@ -326,7 +326,7 @@ export default function SneltoetsTrein() {
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Top 5 Scores:</h2>
           <ul className="list-none text-center">
             {leaderboard.slice(0,5).map((entry, index) => (
-              <li key={index} className="border-b py-1">
+              <li key={index} className="text-center border-b py-1">
                 {index + 1}. {entry.name} – {entry.score} punten
               </li>
             ))}
