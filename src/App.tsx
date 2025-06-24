@@ -276,7 +276,6 @@ export default function SneltoetsTrein() {
         <h1 className="text-3xl font-bold mb-4 text-[#FFC917]">Welkom bij de SneltoetsTrein 🚄</h1>
         <p className="mb-4">In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!</p>
         <h2 className="text-xl font-semibold mb-2 text-[#003082]">Toetscombinaties die je gaat oefenen:</h2>
-        <ul className="list-disc pl-6 space-y-1 text-sm">
           {ORIGINAL_QUESTIONS.map((q, i) => (
             <li key={i}><strong>{q.combo}</strong>: {q.description}</li>
           ))}
