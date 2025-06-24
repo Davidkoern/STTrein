@@ -272,14 +272,17 @@ export default function SneltoetsTrein() {
 
   if (step === -1) {
     return (
-      <div className="p-4 max-w-2xl mx-auto text-[#003082]">
+      <div className="p-4 max-w-2xl mx-auto text-[#003082] text-center">
         <h1 className="text-3xl font-bold mb-4 text-[#FFC917]">Welkom bij de SneltoetsTrein 🚄</h1>
         <p className="mb-4">In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!</p>
         <h2 className="text-xl font-semibold mb-2 text-[#003082]">Toetscombinaties die je gaat oefenen:</h2>
-          {ORIGINAL_QUESTIONS.map((q, i) => (
-            <li key={i}><strong>{q.combo}</strong>: {q.description}</li>
-          ))}
-        </ul>
+        <div className="flex justify-center">
+          <ul className="list-none pl-0 space-y-1 text-left font-mono">
+            {ORIGINAL_QUESTIONS.map((q, i) => (
+              <li key={i}><strong>{q.combo}</strong>: {q.description}</li>
+            ))}
+          </ul>
+        </div>
         <button
           onClick={() => setStep(0)}
           className="mt-6 bg-[#003082] text-white px-4 py-2 rounded"
@@ -290,13 +293,15 @@ export default function SneltoetsTrein() {
 
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Alle scores:</h2>
-          <ul className="space-y-1">
-            {leaderboard.map((entry, index) => (
-              <li key={index} className="border-b py-1">
-                {index + 1}. {entry.name} – {entry.score} punten
-              </li>
-            ))}
-          </ul>
+          <div className="flex justify-center">
+            <ul className="list-none pl-0 space-y-1 text-left font-mono">
+              {leaderboard.map((entry, index) => (
+                <li key={index} className="border-b py-1">
+                  {index + 1}. {entry.name} – {entry.score} punten
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     );
@@ -307,46 +312,58 @@ export default function SneltoetsTrein() {
       <div className="p-4 text-center">
         <h1 className="text-2xl font-bold text-[#003082]">Gefeliciteerd!</h1>
         <p>Je hebt de SneltoetsTrein op tijd het station laten bereiken. 🚉</p>
-        <p className="mb-4 text-[#FFC917] font-semibold">Totale score: {points}</p>
-        <div className="text-left max-w-xl mx-auto">
-          <h2 className="text-xl font-semibold mb-2 text-[#003082]">Overzicht per vraag:</h2>
-          <ul className="space-y-1">
-            {perQuestionStats.map((stat, index) => (
-              <li key={index} className="border-b py-1">
-                <strong>Vraag {index + 1}:</strong> {stat.vraag}<br />
-                Tijd: {stat.tijd} sec – Punten: {stat.punten}
-              </li>
-            ))}
-          </ul>
+        <p className="mb-4 text-[#FFC917] font-semibold">
+          Totale score: {points} van de maximale {ORIGINAL_QUESTIONS.length * 15}
+        </p>
+        <div className="flex justify-center">
+          <div className="text-left max-w-xl">
+            <h2 className="text-xl font-semibold mb-2 text-[#003082]">Overzicht per vraag:</h2>
+            <ul className="list-none pl-0 space-y-1 text-left font-mono">
+              {perQuestionStats.map((stat, index) => (
+                <li key={index} className="border-b py-1">
+                  <strong>Vraag {index + 1}:</strong> {stat.vraag}<br />
+                  Tijd: {stat.tijd} sec – Punten: {stat.punten}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <div className="text-left max-w-xl mx-auto mt-6">
-          <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Top 5 Scores:</h2>
-          <ul className="space-y-1">
-            {leaderboard.map((entry, index) => (
-              <li key={index} className="border-b py-1">
-                {index + 1}. {entry.name} – {entry.score} punten
-              </li>
-            ))}
-          </ul>
+        <div className="flex justify-center mt-6">
+          <div className="text-left max-w-xl">
+            <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Top 5 Scores:</h2>
+            <ul className="list-none pl-0 space-y-1 text-left font-mono">
+              {leaderboard.slice(0, 5).map((entry, index) => (
+                <li key={index} className="border-b py-1">
+                  {index + 1}. {entry.name} – {entry.score} punten
+                </li>
+              ))}
+            </ul>
+            {ranking && (
+              <p className="mt-4 text-lg font-semibold text-[#003082]">
+                Gefeliciteerd, je bent nummer {ranking} van Legal!
+              </p>
+            )}
+          </div>
         </div>
-         <button
-        className="mt-8 bg-[#003082] text-white px-4 py-2 rounded"
-        onClick={() => {
-          setStep(-1);
-          setPoints(0);
-          setPerQuestionStats([]);
-          setRanking(null);
-          setVerbetering(null);
-        }}
-        aria-label="Speel opnieuw"
-      >
-        Speel opnieuw!
-      </button>
-    </div>
-  );
-}
+        <button
+          className="mt-8 bg-[#003082] text-white px-4 py-2 rounded"
+          onClick={() => {
+            setStep(-1);
+            setPoints(0);
+            setPerQuestionStats([]);
+            setRanking(null);
+            setVerbetering(null);
+          }}
+          aria-label="Speel opnieuw"
+        >
+          Speel opnieuw!
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 max-w-xl mx-auto text-[#003082]">
+    <div className="p-4 max-w-xl mx-auto text-[#003082] text-center">
       <div className="relative w-full h-32 bg-[#003082] mb-6 overflow-hidden rounded-xl">
         <div className="absolute bottom-2 left-0 right-0 h-2 bg-[#FFC917] bg-opacity-50">
           <div className="absolute top-0 left-0 h-2 bg-[#FFC917] transition-all duration-700" style={{ width: `${(step / questions.length) * 100}%` }} />
