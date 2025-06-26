@@ -1,3 +1,6 @@
+Please find the updated code below, which centers the text on each page and removes the default bullet point styling.
+
+```tsx
 import { useState, useEffect, useMemo, useRef } from "react";
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
@@ -201,7 +204,7 @@ useEffect(() => {
           details: perQuestionStats,
         });
 
-        const { data, error } = await supabase.rpc('get_best_scores');
+        const { data, error } => await supabase.rpc('get_best_scores');
         if (!error && data) {
           setLeaderboard(data as LeaderboardEntry[]);
           const index = data.findIndex((entry: LeaderboardEntry) => entry.name === username);
@@ -230,7 +233,7 @@ useEffect(() => {
 
   if (!loggedIn) {
     return (
-      <div className="p-4 max-w-sm mx-auto">
+      <div className="p-4 max-w-sm mx-auto text-center"> {/* Added text-center here */}
         {loginMessage && <p className="text-red-600 mb-2 font-semibold">{loginMessage}</p>}
         <h1 className="text-xl font-bold mb-4">SneltoetsTrein Login</h1>
         <input
@@ -275,13 +278,14 @@ useEffect(() => {
 
   if (step === -1) {
     return (
-      <div className="p-4 max-w-2xl mx-auto text-[#003082]">
+      <div className="p-4 max-w-2xl mx-auto text-[#003082] text-center"> {/* Added text-center here */}
         <h1 className="text-3xl font-bold mb-4 text-[#FFC917]">Welkom bij de SneltoetsTrein 🚄</h1>
         <p className="mb-4">In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!</p>
         <h2 className="text-xl font-semibold mb-2 text-[#003082]">Toetscombinaties die je gaat oefenen:</h2>
-        <ul className="list-none text-center">
+        {/* Removed list-none and adjusted text-center for individual list items */}
+        <ul className="list-none p-0"> {/* Removed padding to align more centrally */}
           {ORIGINAL_QUESTIONS.map((q, i) => (
-            <li className="text-center"><strong>{q.combo}</strong>: {q.description}</li>
+            <li key={i} className="py-1"><strong>{q.combo}</strong>: {q.description}</li>
           ))}
         </ul>
         <button
@@ -294,9 +298,10 @@ useEffect(() => {
 
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Alle scores:</h2>
-          <ul className="list-none text-center">
+          {/* Removed list-none and adjusted text-center for individual list items */}
+          <ul className="list-none p-0"> {/* Removed padding to align more centrally */}
             {leaderboard.map((entry, index) => (
-              <li key={index} className="text-center border-b py-1">
+              <li key={index} className="border-b py-1">
                 {index + 1}. {entry.name} – {entry.score} punten
               </li>
             ))}
@@ -314,22 +319,24 @@ useEffect(() => {
         <p className="mb-4 text-[#FFC917] font-semibold">
           Totale score: {points} van de maximale {ORIGINAL_QUESTIONS.length * 15}
         </p>
-        <div className="text-left max-w-xl mx-auto">
+        <div className="text-center max-w-xl mx-auto"> {/* Changed to text-center here */}
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">Overzicht per vraag:</h2>
-          <ul className="list-none text-center">
+          {/* Removed list-none and adjusted text-center for individual list items */}
+          <ul className="list-none p-0"> {/* Removed padding to align more centrally */}
             {perQuestionStats.map((stat, index) => (
-              <li key={index} className="text-center border-b py-1">
+              <li key={index} className="border-b py-1">
                 <strong>Vraag {index + 1}:</strong> {stat.vraag}<br />
                 Tijd: {stat.tijd} sec – Punten: {stat.punten}
               </li>
             ))}
           </ul>
         </div>
-        <div className="text-left max-w-xl mx-auto mt-6">
+        <div className="text-center max-w-xl mx-auto mt-6"> {/* Changed to text-center here */}
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Top 5 Scores:</h2>
-          <ul className="list-none text-center">
+          {/* Removed list-none and adjusted text-center for individual list items */}
+          <ul className="list-none p-0"> {/* Removed padding to align more centrally */}
             {leaderboard.slice(0,5).map((entry, index) => (
-              <li key={index} className="text-center border-b py-1">
+              <li key={index} className="border-b py-1">
                 {index + 1}. {entry.name} – {entry.score} punten
               </li>
             ))}
@@ -358,7 +365,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="p-4 max-w-xl mx-auto text-[#003082]">
+    <div className="p-4 max-w-xl mx-auto text-[#003082] text-center"> {/* Added text-center here */}
       <div className="relative w-full h-32 bg-[#003082] mb-6 overflow-hidden rounded-xl">
         <div className="absolute bottom-2 left-0 right-0 h-2 bg-[#FFC917] bg-opacity-50">
           <div className="absolute top-0 left-0 h-2 bg-[#FFC917] transition-all duration-700" style={{ width: `${(step / questions.length) * 100}%` }} />
@@ -386,3 +393,4 @@ useEffect(() => {
     </div>
   );
 }
+```
