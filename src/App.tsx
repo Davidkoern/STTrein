@@ -168,15 +168,18 @@ export default function SneltoetsTrein() {
     }
   }, [current, loggedIn, step, processing, locked, questions.length]);
 
-  useEffect(() => {
-    if (loggedIn && step === -1) {
-      const fetchLeaderboard = async () => {
-        const { data, error } = await supabase.rpc('get_best_scores');
-        if (!error && data) setLeaderboard(data as LeaderboardEntry[]);
-      };
-      fetchLeaderboard();
-    }
-  }, [loggedIn, step]);
+useEffect(() => {
+  if (loggedIn && step === -1) {
+    const fetchLeaderboard = async () => {
+      const { data, error } = await supabase.rpc('get_best_scores');
+      if (!error && data) {
+        const sortedLeaderboard = (data as LeaderboardEntry[]).sort((a, b) => b.score - a.score);
+        setLeaderboard(sortedLeaderboard);
+      }
+    };
+    fetchLeaderboard();
+  }
+}, [loggedIn, step]);
 
   useEffect(() => {
     if (step >= questions.length && username) {
