@@ -305,22 +305,22 @@ export default function SneltoetsTrein() {
         <h1>Welkom bij de SneltoetsTrein 🚄</h1>
         <p>In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!</p>
         <p>Toetscombinaties die je gaat oefenen:</p>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th>Sneltoets</th>
-              <th>Beschrijving</th>
-            </tr>
-          </thead>
-          <tbody>
-            {QUESTIONS.map((q, i) => (
-              <tr key={i}>
-                <td>{q.displayCombo}</td>
-                <td>{q.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+<table style={{ width: '100%', borderCollapse: 'collapse', margin: '1.5rem 0' }}>
+  <thead>
+    <tr>
+      <th style={{ textAlign: 'left', width: '180px', padding: '6px 12px', borderBottom: '2px solid #ccc' }}>Sneltoets</th>
+      <th style={{ textAlign: 'left', padding: '6px 12px', borderBottom: '2px solid #ccc' }}>Beschrijving</th>
+    </tr>
+  </thead>
+  <tbody>
+    {QUESTIONS.map((q, i) => (
+      <tr key={i}>
+        <td style={{ textAlign: 'left', width: '180px', padding: '6px 12px', borderBottom: '1px solid #eee', fontFamily: 'monospace' }}>{q.displayCombo}</td>
+        <td style={{ textAlign: 'left', padding: '6px 12px', borderBottom: '1px solid #eee' }}>{q.description}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
         <button
           onClick={() => setStep(0)}
           className="mt-6 bg-[#003082] text-white px-4 py-2 rounded"
