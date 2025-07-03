@@ -43,7 +43,7 @@ const QUESTIONS: Question[] = BASE_QUESTIONS.map(q => ({
 }));
 
 // Generieke functie met correcte definitie
-function shuffleArray(array: T[]): T[] {
+function shuffleArray<T>(array: T[]): T[] {
   const newArr = [...array];
   for (let i = newArr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -88,20 +88,26 @@ export default function SneltoetsTrein() {
   const [processing, setProcessing] = useState(false);
 
   // States met expliciete types
-  const [perQuestionStats, setPerQuestionStats] = useState([]);
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [ranking, setRanking] = useState(null);
-  const [verbetering, setVerbetering] = useState(null);
+  const [perQuestionStats, setPerQuestionStats] = useState<PerQuestionStat[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [ranking, setRanking] = useState<number | null>(null);
+  const [verbetering, setVerbetering] = useState<number | null>(null);
 
   const startRef = useRef(Date.now());
   const loginTimeRef = useRef(0);
   const attemptsRef = useRef(0);
   const readyRef = useRef(true);
-  const nameInputRef = useRef(null);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Correcte useMemo hook
+  // HIER IS DE FOUT GECORRIGEERD
   const current = useMemo(() => {
-    if (step >= 0 && step  {
+    if (step >= 0 && step < questions.length) {
+      return questions[step];
+    }
+    return null;
+  }, [step, questions]);
+
+  useEffect(() => {
     document.body.style.backgroundColor = '#FFC917';
     document.body.style.color = '#003082';
     document.body.style.textAlign = 'center';
@@ -115,7 +121,8 @@ export default function SneltoetsTrein() {
   }, [loggedIn]);
 
   useEffect(() => {
-    if (loggedIn && step >= 0 && step  {
+    if (loggedIn && step >= 0 && step < questions.length) {
+      const handler = (e: KeyboardEvent) => {
         if (!e.key || !readyRef.current || processing || locked || !current) return;
         if (["Control", "Alt", "Meta", "Shift"].includes(e.key)) return;
         e.preventDefault();
@@ -262,115 +269,123 @@ export default function SneltoetsTrein() {
 
   if (!loggedIn) {
     return (
-      
-        {loginMessage && {loginMessage}}
-        SneltoetsTrein Login
-         setInputName(e.target.value)}
+      <div style={{ maxWidth: '400px', margin: '0 auto', padding: '1rem' }}>
+        {loginMessage && <p>{loginMessage}</p>}
+        <h1>SneltoetsTrein Login</h1>
+        <input
+          type="text"
+          value={inputName}
+          onChange={(e) => setInputName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
           aria-label="Vul je naam in"
           ref={nameInputRef}
         />
-         setPassword(e.target.value)}
+        <input
+          type={showPassword ? "text" : "password"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
           aria-label="Vul wachtwoord in"
         />
-         setShowPassword(!showPassword)}
+        <button
+          onClick={() => setShowPassword(!showPassword)}
           aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
           type="button"
         >
           {showPassword ? "👁️" : "🙈"}
-        
-        Inloggen
-      
+        </button>
+        <button onClick={handleLogin}>Inloggen</button>
+      </div>
     );
   }
 
   if (step === -1) {
     return (
-      
-        Welkom bij de SneltoetsTrein 🚄
-        In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!
-        Toetscombinaties die je gaat oefenen:
-        
-          
-            
-              Sneltoets
-              Beschrijving
-            
-          
-          
+      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
+        <h1>Welkom bij de SneltoetsTrein 🚄</h1>
+        <p>In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!</p>
+        <p>Toetscombinaties die je gaat oefenen:</p>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr>
+              <th>Sneltoets</th>
+              <th>Beschrijving</th>
+            </tr>
+          </thead>
+          <tbody>
             {QUESTIONS.map((q, i) => (
-              
-                {q.displayCombo}
-                {q.description}
-              
+              <tr key={i}>
+                <td>{q.displayCombo}</td>
+                <td>{q.description}</td>
+              </tr>
             ))}
-          
-        
-         setStep(0)}
+          </tbody>
+        </table>
+        <button
+          onClick={() => setStep(0)}
           className="mt-6 bg-[#003082] text-white px-4 py-2 rounded"
           aria-label="Start de oefening"
         >
           Start de oefening
-        
-        🏆 Alle scores:
-        
+        </button>
+        <h2>🏆 Alle scores:</h2>
+        <ul>
           {leaderboard.map((entry, index) => (
-            
+            <li key={index}>
               {index + 1}. {entry.name} – {entry.score} punten
-            
+            </li>
           ))}
-        
-      
+        </ul>
+      </div>
     );
   }
 
   if (step >= questions.length) {
     return (
-      
-        Gefeliciteerd!
-        Je hebt de SneltoetsTrein op tijd het station laten bereiken. 🚉
-        Totale score: {points} van de maximale {QUESTIONS.length * 15}
-        Overzicht per vraag:
-        
-          
-            
-              Vraag
-              Opdracht
-              Resultaat
-            
-          
-          
+      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
+        <h1>Gefeliciteerd!</h1>
+        <p>Je hebt de SneltoetsTrein op tijd het station laten bereiken. 🚉</p>
+        <p>Totale score: {points} van de maximale {QUESTIONS.length * 15}</p>
+        <h2>Overzicht per vraag:</h2>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr>
+              <th>Vraag</th>
+              <th>Opdracht</th>
+              <th>Resultaat</th>
+            </tr>
+          </thead>
+          <tbody>
             {perQuestionStats.map((stat, index) => (
-              
-                {index + 1}
-                {stat.vraag}
-                Tijd: {stat.tijd}s – Punten: {stat.punten}
-              
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{stat.vraag}</td>
+                <td>Tijd: {stat.tijd}s – Punten: {stat.punten}</td>
+              </tr>
             ))}
-          
-        
-        🏆 Top 5 Scores:
-        
+          </tbody>
+        </table>
+        <h2>🏆 Top 5 Scores:</h2>
+        <ul>
           {leaderboard.slice(0, 5).map((entry, index) => (
-            
+            <li key={index}>
               {index + 1}. {entry.name} – {entry.score} punten
-            
+            </li>
           ))}
-        
+        </ul>
         {ranking && (
-          Gefeliciteerd, je bent nummer {ranking} van Legal!
+          <p>Gefeliciteerd, je bent nummer {ranking} van Legal!</p>
         )}
-        Speel opnieuw!
-      
+        <button onClick={resetGame}>Speel opnieuw!</button>
+      </div>
     );
   }
 
   return (
-    
-      🚂💨
-      🚉 Station
-      {`
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
+      <h1>🚂💨</h1>
+      <h2>🚉 Station</h2>
+      <style>{`
         @keyframes puff {
           0% { opacity: 0; transform: scale(0.5) translateY(10px); }
           50% { opacity: 1; transform: scale(1.2) translateY(-5px); }
@@ -379,12 +394,12 @@ export default function SneltoetsTrein() {
         .animate-puff {
           animation: puff 0.6s ease-out;
         }
-      `}
-      SneltoetsTrein
-      Vraag {step + 1} van {questions.length}
-      Druk op de sneltoets voor: {current?.description}
-      {gameMessage && {gameMessage}}
-      Speel opnieuw!
-    
+      `}</style>
+      <p>SneltoetsTrein</p>
+      <p>Vraag {step + 1} van {questions.length}</p>
+      <p>Druk op de sneltoets voor: {current?.description}</p>
+      {gameMessage && <p>{gameMessage}</p>}
+      <button onClick={resetGame}>Speel opnieuw!</button>
+    </div>
   );
 }
