@@ -2,9 +2,9 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // Type definities
-type Question = { combo: string, displayCombo: string, description: string };
-type PerQuestionStat = { vraag: string, tijd: string, punten: number };
-type LeaderboardEntry = { name: string, score: number };
+interface Question { combo: string; displayCombo: string; description: string; }
+interface PerQuestionStat { vraag: string; tijd: string; punten: number; }
+interface LeaderboardEntry { name: string; score: number; }
 
 // Vertaaltabel voor technische toetsnamen naar Nederlandse weergave
 const keyTranslation: { [key: string]: string } = {
@@ -16,7 +16,7 @@ const keyTranslation: { [key: string]: string } = {
 };
 
 // Basisvragenlijst
-const BASE_QUESTIONS: { combo: string, description: string }[] = [
+const BASE_QUESTIONS: { combo: string; description: string }[] = [
   { combo: "shift+enter", description: "E-mail openen in nieuw venster" },
   { combo: "ctrl+1", description: "Naar mail gaan in Outlook (vanuit je agenda)" },
   { combo: "ctrl+arrowright", description: "Cursor een woord naar rechts verplaatsen" },
@@ -42,7 +42,7 @@ const QUESTIONS: Question[] = BASE_QUESTIONS.map(q => ({
   displayCombo: q.combo.split('+').map(part => keyTranslation[part] || part).join('+')
 }));
 
-// Generieke functie met correcte  definitie
+// Generieke functie met correcte definitie
 function shuffleArray(array: T[]): T[] {
   const newArr = [...array];
   for (let i = newArr.length - 1; i > 0; i--) {
@@ -116,7 +116,6 @@ export default function SneltoetsTrein() {
 
   useEffect(() => {
     if (loggedIn && step >= 0 && step  {
-        // Defensieve check voor event.key
         if (!e.key || !readyRef.current || processing || locked || !current) return;
         if (["Control", "Alt", "Meta", "Shift"].includes(e.key)) return;
         e.preventDefault();
@@ -147,6 +146,7 @@ export default function SneltoetsTrein() {
             setStep((prev) => prev + 1);
             attemptsRef.current = 0;
             readyRef.current = true;
+            startRef.current = Date.now();
           }, 1000);
 
         } else {
@@ -167,6 +167,7 @@ export default function SneltoetsTrein() {
               setProcessing(false);
               setStep((prev) => prev + 1);
               readyRef.current = true;
+              startRef.current = Date.now();
             }, 2000);
           } else {
             setGameMessage("Probeer het opnieuw.");
@@ -267,22 +268,19 @@ export default function SneltoetsTrein() {
          setInputName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
           aria-label="Vul je naam in"
+          ref={nameInputRef}
         />
+         setPassword(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+          aria-label="Vul wachtwoord in"
+        />
+         setShowPassword(!showPassword)}
+          aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
+          type="button"
+        >
+          {showPassword ? "👁️" : "🙈"}
         
-           setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-            aria-label="Vul wachtwoord in"
-          />
-           setShowPassword(!showPassword)}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-gray-600"
-            aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
-          >
-            {showPassword ? "👁️" : "🙈"}
-          
-        
-        
-          Inloggen
-        
+        Inloggen
       
     );
   }
@@ -296,19 +294,17 @@ export default function SneltoetsTrein() {
         
           
             
+              Sneltoets
+              Beschrijving
+            
+          
+          
+            {QUESTIONS.map((q, i) => (
               
-                Sneltoets
-                Beschrijving
+                {q.displayCombo}
+                {q.description}
               
-            
-            
-              {QUESTIONS.map((q, i) => (
-                
-                  {q.displayCombo}
-                  {q.description}
-                
-              ))}
-            
+            ))}
           
         
          setStep(0)}
@@ -317,15 +313,13 @@ export default function SneltoetsTrein() {
         >
           Start de oefening
         
+        🏆 Alle scores:
         
-          🏆 Alle scores:
-          
-            {leaderboard.map((entry, index) => (
-              
-                {index + 1}. {entry.name} – {entry.score} punten
-              
-            ))}
-          
+          {leaderboard.map((entry, index) => (
+            
+              {index + 1}. {entry.name} – {entry.score} punten
+            
+          ))}
         
       
     );
@@ -336,65 +330,46 @@ export default function SneltoetsTrein() {
       
         Gefeliciteerd!
         Je hebt de SneltoetsTrein op tijd het station laten bereiken. 🚉
+        Totale score: {points} van de maximale {QUESTIONS.length * 15}
+        Overzicht per vraag:
         
-          Totale score: {points} van de maximale {QUESTIONS.length * 15}
-        
-        
-          Overzicht per vraag:
           
             
-              
-                
-                  Vraag
-                  Opdracht
-                  Resultaat
-                
-              
-              
-                {perQuestionStats.map((stat, index) => (
-                  
-                    {index + 1}
-                    {stat.vraag}
-                    Tijd: {stat.tijd}s – Punten: {stat.punten}
-                  
-                ))}
-              
+              Vraag
+              Opdracht
+              Resultaat
             
           
-        
-        
-          🏆 Top 5 Scores:
           
-            {leaderboard.slice(0, 5).map((entry, index) => (
+            {perQuestionStats.map((stat, index) => (
               
-                {index + 1}. {entry.name} – {entry.score} punten
+                {index + 1}
+                {stat.vraag}
+                Tijd: {stat.tijd}s – Punten: {stat.punten}
               
             ))}
           
-          {ranking && (
+        
+        🏆 Top 5 Scores:
+        
+          {leaderboard.slice(0, 5).map((entry, index) => (
             
-              Gefeliciteerd, je bent nummer {ranking} van Legal!
+              {index + 1}. {entry.name} – {entry.score} punten
             
-          )}
+          ))}
         
-        
-          Speel opnieuw!
-        
+        {ranking && (
+          Gefeliciteerd, je bent nummer {ranking} van Legal!
+        )}
+        Speel opnieuw!
       
     );
   }
 
   return (
     
-      
-        
-          
-        
-        
-          🚂💨
-        
-        🚉 Station
-      
+      🚂💨
+      🚉 Station
       {`
         @keyframes puff {
           0% { opacity: 0; transform: scale(0.5) translateY(10px); }
@@ -405,14 +380,10 @@ export default function SneltoetsTrein() {
           animation: puff 0.6s ease-out;
         }
       `}
-
       SneltoetsTrein
       Vraag {step + 1} van {questions.length}
       Druk op de sneltoets voor: {current?.description}
       {gameMessage && {gameMessage}}
-      
-        Speel opnieuw!
-      
+      Speel opnieuw!
     
   );
-}
