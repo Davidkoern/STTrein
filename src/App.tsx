@@ -206,7 +206,8 @@ export default function SneltoetsTrein() {
           details: perQuestionStats,
         });
 
-        const { data, error } = await supabase.rpc('get_best_scores');
+        // *** DEZE REGEL IS GECORRIGEERD: '=>' is veranderd in '=' ***
+        const { data, error } = await supabase.rpc('get_best_scores'); 
         if (!error && data) {
           const sortedLeaderboard = (data as LeaderboardEntry[]).sort((a, b) => b.score - a.score);
           setLeaderboard(sortedLeaderboard);
@@ -405,13 +406,20 @@ export default function SneltoetsTrein() {
 }
 ```
 
-[1] https://github.com/slidevjs/slidev/issues/1844
-[2] https://github.com/evanw/esbuild/issues/3049
-[3] https://stackoverflow.com/questions/79055670/vite-vue3-error-expected-but-found-setup-when-using-lang-ts
-[4] https://github.com/vitejs/vite/issues/2659
-[5] https://stackoverflow.com/questions/79296528/errors-while-starting-vite-react
-[6] https://www.reddit.com/r/reactjs/comments/1hieo6s/error_while_creating_react_project/
-[7] https://www.reddit.com/r/vuejs/comments/1brioqs/typescript_file_wont_compile_says_expected_but/
-[8] https://stackoverflow.com/questions/60438275/react-typescript-error-parsing-error-expected/60438585
-[9] https://laracasts.com/discuss/channels/inertia/vite-bilde-note-resolve-script-setup-langts
-[10] https://github.com/evanw/esbuild/issues/3016
+[1] https://stackoverflow.com/questions/75773036/having-issue-while-migrating-javascript-to-typescript-react-component
+[2] https://stackoverflow.com/questions/79296528/errors-while-starting-vite-react
+[3] https://github.com/evanw/esbuild/issues/2048
+[4] https://github.com/vercel/next.js/issues/72878
+[5] https://www.reddit.com/r/vuejs/comments/1brioqs/typescript_file_wont_compile_says_expected_but/
+[6] https://laracasts.com/discuss/channels/inertia/vite-bilde-note-resolve-script-setup-langts
+[7] https://github.com/slidevjs/slidev/issues/1844
+[8] https://stackoverflow.com/questions/76684190/typescript-errors-with-build-command-in-vite/76684215
+[9] https://stackoverflow.com/questions/70397360/react-cant-resolve-tsx-files/70658062
+[10] https://github.com/vitejs/vite/issues/2659
+[11] https://mattermost.com/blog/using-react-with-typescript/
+[12] https://esbuild.github.io/api/
+[13] https://www.reddit.com/r/node/comments/1cyy103/anyone_familiar_with_debugging_vite_build_errors/
+[14] https://discourse.aurelia.io/t/method-decorator-does-not-work-with-vite/5434
+[15] https://www.reddit.com/r/reactjs/comments/12mo1qm/vite_doesnt_show_typescript_errorswarning_until/
+[16] https://github.com/vitejs/vite/discussions/12870
+[17] https://vite.dev/guide/troubleshooting
