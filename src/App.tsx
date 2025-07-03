@@ -1,33 +1,47 @@
-Please find the updated code below, which centers the text on each page and removes the default bullet point styling.
-
-```tsx
 import { useState, useEffect, useMemo, useRef } from "react";
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-// Type definitions
-type Question = { combo: string, description: string };
+// Type definities
+type Question = { combo: string, displayCombo: string, description: string };
 type PerQuestionStat = { vraag: string, tijd: string, punten: number };
 type LeaderboardEntry = { name: string, score: number };
 
-const ORIGINAL_QUESTIONS: Question[] = [
+// Vertaaltabel voor technische toetsnamen naar Nederlandse weergave
+const keyTranslation: { [key: string]: string } = {
+  'arrowright': 'pijl rechts',
+  'arrowleft': 'pijl links',
+  'end': 'end',
+  'backspace': 'backspace',
+  'enter': 'enter',
+};
+
+// Basisvragenlijst
+const BASE_QUESTIONS: { combo: string, description: string }[] = [
   { combo: "shift+enter", description: "E-mail openen in nieuw venster" },
   { combo: "ctrl+1", description: "Naar mail gaan in Outlook (vanuit je agenda)" },
-  { combo: "ctrl+arrowright", description: "Cursus woord naar rechts" },
-  { combo: "ctrl+y", description: "Actie herhalen" },
-  { combo: "ctrl+end", description: "Naar einde document" },
-  { combo: "ctrl+arrowleft", description: "Met cursor woord naar links" },
+  { combo: "ctrl+arrowright", description: "Cursor een woord naar rechts verplaatsen" },
+  { combo: "ctrl+y", description: "Laatste actie herhalen" },
+  { combo: "ctrl+end", description: "Naar het einde van het document gaan" },
+  { combo: "ctrl+arrowleft", description: "Cursor een woord naar links verplaatsen" },
   { combo: "ctrl+2", description: "Naar je agenda gaan in Outlook (vanuit je mailbox)" },
   { combo: "ctrl+c", description: "Kopiëren van geselecteerde tekst of items" },
   { combo: "ctrl+x", description: "Knippen van geselecteerde tekst of items" },
-  { combo: "ctrl+z", description: "Ongedaan maken van de laatste actie" },
+  { combo: "ctrl+z", description: "Laatste actie ongedaan maken" },
   { combo: "ctrl+a", description: "Alles selecteren binnen het huidige venster of document" },
   { combo: "ctrl+b", description: "Vetgedrukt maken" },
   { combo: "ctrl+u", description: "Onderstrepen" },
   { combo: "ctrl+i", description: "Cursief maken" },
   { combo: "ctrl+f", description: "Zoeken" },
-  { combo: "ctrl+backspace", description: "Verwijderen van het woord links van de cursor" },
+  { combo: "ctrl+backspace", description: "Het woord links van de cursor verwijderen" },
   { combo: "ctrl+r", description: "Geselecteerd bericht beantwoorden in Outlook" }
 ];
+
+// Genereer de definitieve vragenlijst met de Nederlandse weergave van de sneltoetsen
+const QUESTIONS: Question[] = BASE_QUESTIONS.map(q => ({
+    ...q,
+    displayCombo: q.combo.split('+').map(part => keyTranslation[part] || part).join('+')
+}));
+
 
 function shuffleArray<T>(array: T[]): T[] {
   const newArr = [...array];
@@ -55,7 +69,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function SneltoetsTrein() {
-  const questions = useMemo(() => shuffleArray(ORIGINAL_QUESTIONS), []);
+  const questions = useMemo(() => shuffleArray(QUESTIONS), []);
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [inputName, setInputName] = useState("");
@@ -143,7 +157,7 @@ export default function SneltoetsTrein() {
           if (attemptsRef.current >= 2) {
             setLocked(true);
             setProcessing(true);
-            setGameMessage(`Antwoord: ${current.combo}`);
+            setGameMessage(`Antwoord: ${current.displayCombo}`);
 
             setTimeout(() => {
               setPerQuestionStats((prev) => [...prev, {
@@ -171,18 +185,18 @@ export default function SneltoetsTrein() {
     }
   }, [current, loggedIn, step, processing, locked, questions.length]);
 
-useEffect(() => {
-  if (loggedIn && step === -1) {
-    const fetchLeaderboard = async () => {
-      const { data, error } = await supabase.rpc('get_best_scores');
-      if (!error && data) {
-        const sortedLeaderboard = (data as LeaderboardEntry[]).sort((a, b) => b.score - a.score);
-        setLeaderboard(sortedLeaderboard);
-      }
-    };
-    fetchLeaderboard();
-  }
-}, [loggedIn, step]);
+  useEffect(() => {
+    if (loggedIn && step === -1) {
+      const fetchLeaderboard = async () => {
+        const { data, error } = await supabase.rpc('get_best_scores');
+        if (!error && data) {
+          const sortedLeaderboard = (data as LeaderboardEntry[]).sort((a, b) => b.score - a.score);
+          setLeaderboard(sortedLeaderboard);
+        }
+      };
+      fetchLeaderboard();
+    }
+  }, [loggedIn, step]);
 
   useEffect(() => {
     if (step >= questions.length && username) {
@@ -204,10 +218,11 @@ useEffect(() => {
           details: perQuestionStats,
         });
 
-        const { data, error } => await supabase.rpc('get_best_scores');
+        const { data, error } = await supabase.rpc('get_best_scores');
         if (!error && data) {
-          setLeaderboard(data as LeaderboardEntry[]);
-          const index = data.findIndex((entry: LeaderboardEntry) => entry.name === username);
+          const sortedLeaderboard = (data as LeaderboardEntry[]).sort((a, b) => b.score - a.score);
+          setLeaderboard(sortedLeaderboard);
+          const index = sortedLeaderboard.findIndex((entry: LeaderboardEntry) => entry.name === username);
           if (index !== -1) setRanking(index + 1);
         }
       };
@@ -233,7 +248,7 @@ useEffect(() => {
 
   if (!loggedIn) {
     return (
-      <div className="p-4 max-w-sm mx-auto text-center"> {/* Added text-center here */}
+      <div className="p-4 max-w-sm mx-auto text-center">
         {loginMessage && <p className="text-red-600 mb-2 font-semibold">{loginMessage}</p>}
         <h1 className="text-xl font-bold mb-4">SneltoetsTrein Login</h1>
         <input
@@ -278,16 +293,30 @@ useEffect(() => {
 
   if (step === -1) {
     return (
-      <div className="p-4 max-w-2xl mx-auto text-[#003082] text-center"> {/* Added text-center here */}
+      <div className="p-4 max-w-2xl mx-auto text-[#003082] text-center">
         <h1 className="text-3xl font-bold mb-4 text-[#FFC917]">Welkom bij de SneltoetsTrein 🚄</h1>
         <p className="mb-4">In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!</p>
         <h2 className="text-xl font-semibold mb-2 text-[#003082]">Toetscombinaties die je gaat oefenen:</h2>
-        {/* Removed list-none and adjusted text-center for individual list items */}
-        <ul className="list-none p-0"> {/* Removed padding to align more centrally */}
-          {ORIGINAL_QUESTIONS.map((q, i) => (
-            <li key={i} className="py-1"><strong>{q.combo}</strong>: {q.description}</li>
-          ))}
-        </ul>
+        
+        <div className="overflow-x-auto">
+            <table className="w-full text-left mx-auto max-w-lg border-collapse mt-4">
+                <thead>
+                    <tr>
+                        <th className="p-2 border-b-2 border-[#003082] font-bold">Sneltoets</th>
+                        <th className="p-2 border-b-2 border-[#003082] font-bold">Beschrijving</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {QUESTIONS.map((q, i) => (
+                        <tr key={i} className="border-b border-[#003082]/30">
+                            <td className="p-2 align-top whitespace-nowrap"><strong>{q.displayCombo}</strong></td>
+                            <td className="p-2 align-top">{q.description}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+
         <button
           onClick={() => setStep(0)}
           className="mt-6 bg-[#003082] text-white px-4 py-2 rounded"
@@ -298,8 +327,7 @@ useEffect(() => {
 
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Alle scores:</h2>
-          {/* Removed list-none and adjusted text-center for individual list items */}
-          <ul className="list-none p-0"> {/* Removed padding to align more centrally */}
+          <ul className="list-none p-0">
             {leaderboard.map((entry, index) => (
               <li key={index} className="border-b py-1">
                 {index + 1}. {entry.name} – {entry.score} punten
@@ -317,12 +345,11 @@ useEffect(() => {
         <h1 className="text-2xl font-bold text-[#003082]">Gefeliciteerd!</h1>
         <p>Je hebt de SneltoetsTrein op tijd het station laten bereiken. 🚉</p>
         <p className="mb-4 text-[#FFC917] font-semibold">
-          Totale score: {points} van de maximale {ORIGINAL_QUESTIONS.length * 15}
+          Totale score: {points} van de maximale {QUESTIONS.length * 15}
         </p>
-        <div className="text-center max-w-xl mx-auto"> {/* Changed to text-center here */}
+        <div className="text-center max-w-xl mx-auto">
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">Overzicht per vraag:</h2>
-          {/* Removed list-none and adjusted text-center for individual list items */}
-          <ul className="list-none p-0"> {/* Removed padding to align more centrally */}
+          <ul className="list-none p-0">
             {perQuestionStats.map((stat, index) => (
               <li key={index} className="border-b py-1">
                 <strong>Vraag {index + 1}:</strong> {stat.vraag}<br />
@@ -331,11 +358,10 @@ useEffect(() => {
             ))}
           </ul>
         </div>
-        <div className="text-center max-w-xl mx-auto mt-6"> {/* Changed to text-center here */}
+        <div className="text-center max-w-xl mx-auto mt-6">
           <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Top 5 Scores:</h2>
-          {/* Removed list-none and adjusted text-center for individual list items */}
-          <ul className="list-none p-0"> {/* Removed padding to align more centrally */}
-            {leaderboard.slice(0,5).map((entry, index) => (
+          <ul className="list-none p-0">
+            {leaderboard.slice(0, 5).map((entry, index) => (
               <li key={index} className="border-b py-1">
                 {index + 1}. {entry.name} – {entry.score} punten
               </li>
@@ -365,7 +391,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="p-4 max-w-xl mx-auto text-[#003082] text-center"> {/* Added text-center here */}
+    <div className="p-4 max-w-xl mx-auto text-[#003082] text-center">
       <div className="relative w-full h-32 bg-[#003082] mb-6 overflow-hidden rounded-xl">
         <div className="absolute bottom-2 left-0 right-0 h-2 bg-[#FFC917] bg-opacity-50">
           <div className="absolute top-0 left-0 h-2 bg-[#FFC917] transition-all duration-700" style={{ width: `${(step / questions.length) * 100}%` }} />
@@ -388,9 +414,8 @@ useEffect(() => {
 
       <h1 className="text-2xl font-bold mb-4 text-[#FFC917]">SneltoetsTrein</h1>
       <p className="mb-2 text-[#FFC917] font-semibold">Vraag {step + 1} van {questions.length}</p>
-      <p className="mb-4">Druk op de sneltoets voor: <strong>{current.description}</strong></p>
+      <p className="mb-4">Druk op de sneltoets voor: <strong>{current?.description}</strong></p>
       {gameMessage && <p className="mt-2 text-lg">{gameMessage}</p>}
     </div>
   );
 }
-```
