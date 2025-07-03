@@ -38,8 +38,8 @@ const BASE_QUESTIONS: { combo: string, description: string }[] = [
 
 // Genereer de definitieve vragenlijst met de Nederlandse weergave van de sneltoetsen
 const QUESTIONS: Question[] = BASE_QUESTIONS.map(q => ({
-    ...q,
-    displayCombo: q.combo.split('+').map(part => keyTranslation[part] || part).join('+')
+  ...q,
+  displayCombo: q.combo.split('+').map(part => keyTranslation[part] || part).join('+')
 }));
 
 // Generieke functie met correcte  definitie
@@ -187,8 +187,8 @@ export default function SneltoetsTrein() {
       const fetchLeaderboard = async () => {
         const { data, error } = await supabase.rpc('get_best_scores');
         if (error) {
-            console.error("Fout bij ophalen leaderboard:", error);
-            return;
+          console.error("Fout bij ophalen leaderboard:", error);
+          return;
         }
         if (data) {
           const sortedLeaderboard = (data as LeaderboardEntry[]).sort((a, b) => b.score - a.score);
@@ -221,8 +221,8 @@ export default function SneltoetsTrein() {
 
         const { data, error } = await supabase.rpc('get_best_scores');
         if (error) {
-            console.error("Fout bij ophalen leaderboard na opslaan:", error);
-            return;
+          console.error("Fout bij ophalen leaderboard na opslaan:", error);
+          return;
         }
         if (data) {
           const sortedLeaderboard = (data as LeaderboardEntry[]).sort((a, b) => b.score - a.score);
@@ -277,7 +277,7 @@ export default function SneltoetsTrein() {
             className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-gray-600"
             aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
           >
-            {showPassword ? "Show" : "Hide"}
+            {showPassword ? "👁️" : "🙈"}
           
         
         
@@ -290,26 +290,26 @@ export default function SneltoetsTrein() {
   if (step === -1) {
     return (
       
-        Welkom bij de SneltoetsTrein
+        Welkom bij de SneltoetsTrein 🚄
         In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!
         Toetscombinaties die je gaat oefenen:
         
+          
             
-                
-                    
-                        Sneltoets
-                        Beschrijving
-                    
-                
-                
-                    {QUESTIONS.map((q, i) => (
-                        
-                            {q.displayCombo}
-                            {q.description}
-                        
-                    ))}
-                
+              
+                Sneltoets
+                Beschrijving
+              
             
+            
+              {QUESTIONS.map((q, i) => (
+                
+                  {q.displayCombo}
+                  {q.description}
+                
+              ))}
+            
+          
         
          setStep(0)}
           className="mt-6 bg-[#003082] text-white px-4 py-2 rounded"
@@ -318,11 +318,11 @@ export default function SneltoetsTrein() {
           Start de oefening
         
         
-          Alle scores:
+          🏆 Alle scores:
           
             {leaderboard.map((entry, index) => (
               
-                {index + 1}. {entry.name} - {entry.score} punten
+                {index + 1}. {entry.name} – {entry.score} punten
               
             ))}
           
@@ -335,39 +335,39 @@ export default function SneltoetsTrein() {
     return (
       
         Gefeliciteerd!
-        Je hebt de SneltoetsTrein op tijd het station laten bereiken.
+        Je hebt de SneltoetsTrein op tijd het station laten bereiken. 🚉
         
           Totale score: {points} van de maximale {QUESTIONS.length * 15}
         
         
           Overzicht per vraag:
-           
+          
+            
+              
                 
-                    
-                        
-                            Vraag
-                            Opdracht
-                            Resultaat
-                        
-                    
-                    
-                        {perQuestionStats.map((stat, index) => (
-                            
-                                {index + 1}
-                                {stat.vraag}
-                                Tijd: {stat.tijd}s - Punten: {stat.punten}
-                            
-                        ))}
-                    
+                  Vraag
+                  Opdracht
+                  Resultaat
                 
-           
+              
+              
+                {perQuestionStats.map((stat, index) => (
+                  
+                    {index + 1}
+                    {stat.vraag}
+                    Tijd: {stat.tijd}s – Punten: {stat.punten}
+                  
+                ))}
+              
+            
+          
         
         
-          Top 5 Scores:
+          🏆 Top 5 Scores:
           
             {leaderboard.slice(0, 5).map((entry, index) => (
               
-                {index + 1}. {entry.name} - {entry.score} punten
+                {index + 1}. {entry.name} – {entry.score} punten
               
             ))}
           
@@ -391,12 +391,20 @@ export default function SneltoetsTrein() {
           
         
         
-          Train
-          Fast
+          🚂💨
         
-        Station
+        🚉 Station
       
-      {`@keyframes puff { 0% { opacity: 0; transform: scale(0.5) translateY(10px); } 50% { opacity: 1; transform: scale(1.2) translateY(-5px); } 100% { opacity: 0; transform: scale(1) translateY(-20px); } } .animate-puff { animation: puff 0.6s ease-out; }`}
+      {`
+        @keyframes puff {
+          0% { opacity: 0; transform: scale(0.5) translateY(10px); }
+          50% { opacity: 1; transform: scale(1.2) translateY(-5px); }
+          100% { opacity: 0; transform: scale(1) translateY(-20px); }
+        }
+        .animate-puff {
+          animation: puff 0.6s ease-out;
+        }
+      `}
 
       SneltoetsTrein
       Vraag {step + 1} van {questions.length}
