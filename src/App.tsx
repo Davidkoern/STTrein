@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // Type definities
@@ -42,7 +42,7 @@ const QUESTIONS: Question[] = BASE_QUESTIONS.map(q => ({
     displayCombo: q.combo.split('+').map(part => keyTranslation[part] || part).join('+')
 }));
 
-
+// Generieke functie met correcte  definitie
 function shuffleArray(array: T[]): T[] {
   const newArr = [...array];
   for (let i = newArr.length - 1; i > 0; i--) {
@@ -64,8 +64,13 @@ function normalizeCombo(event: KeyboardEvent): string {
   return keys.join("+");
 }
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+// Veilige initialisatie van Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error("Supabase URL of key ontbreekt in het .env bestand.");
+}
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function SneltoetsTrein() {
@@ -81,6 +86,8 @@ export default function SneltoetsTrein() {
   const [gameMessage, setGameMessage] = useState("");
   const [locked, setLocked] = useState(false);
   const [processing, setProcessing] = useState(false);
+
+  // States met expliciete types
   const [perQuestionStats, setPerQuestionStats] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [ranking, setRanking] = useState(null);
@@ -92,6 +99,7 @@ export default function SneltoetsTrein() {
   const readyRef = useRef(true);
   const nameInputRef = useRef(null);
 
+  // Correcte useMemo hook
   const current = useMemo(() => {
     if (step >= 0 && step  {
     document.body.style.backgroundColor = '#FFC917';
@@ -108,7 +116,8 @@ export default function SneltoetsTrein() {
 
   useEffect(() => {
     if (loggedIn && step >= 0 && step  {
-        if (!readyRef.current || processing || locked || !current) return;
+        // Defensieve check voor event.key
+        if (!e.key || !readyRef.current || processing || locked || !current) return;
         if (["Control", "Alt", "Meta", "Shift"].includes(e.key)) return;
         e.preventDefault();
         readyRef.current = false;
@@ -129,7 +138,7 @@ export default function SneltoetsTrein() {
             tijd: (elapsed / 1000).toFixed(1),
             punten
           }]);
-          setGameMessage("Goed! 🚆");
+          setGameMessage("Goed!");
 
           setTimeout(() => {
             setGameMessage("");
@@ -177,7 +186,11 @@ export default function SneltoetsTrein() {
     if (loggedIn && step === -1) {
       const fetchLeaderboard = async () => {
         const { data, error } = await supabase.rpc('get_best_scores');
-        if (!error && data) {
+        if (error) {
+            console.error("Fout bij ophalen leaderboard:", error);
+            return;
+        }
+        if (data) {
           const sortedLeaderboard = (data as LeaderboardEntry[]).sort((a, b) => b.score - a.score);
           setLeaderboard(sortedLeaderboard);
         }
@@ -197,8 +210,8 @@ export default function SneltoetsTrein() {
           .limit(1);
 
         const previous = previousScores?.[0]?.score ?? null;
-        const verbetering = previous !== null ? points - previous : null;
-        setVerbetering(verbetering);
+        const verbeteringValue = previous !== null ? points - previous : null;
+        setVerbetering(verbeteringValue);
 
         await supabase.from('scores').insert({
           name: username,
@@ -206,12 +219,15 @@ export default function SneltoetsTrein() {
           details: perQuestionStats,
         });
 
-        // *** DEZE REGEL IS GECORRIGEERD: '=>' is veranderd in '=' ***
-        const { data, error } = await supabase.rpc('get_best_scores'); 
-        if (!error && data) {
+        const { data, error } = await supabase.rpc('get_best_scores');
+        if (error) {
+            console.error("Fout bij ophalen leaderboard na opslaan:", error);
+            return;
+        }
+        if (data) {
           const sortedLeaderboard = (data as LeaderboardEntry[]).sort((a, b) => b.score - a.score);
           setLeaderboard(sortedLeaderboard);
-          const index = sortedLeaderboard.findIndex((entry: LeaderboardEntry) => entry.name === username);
+          const index = sortedLeaderboard.findIndex((entry: LeaderboardEntry) => entry.name === username && entry.score === points);
           if (index !== -1) setRanking(index + 1);
         }
       };
@@ -219,7 +235,7 @@ export default function SneltoetsTrein() {
     }
   }, [step, username, points, perQuestionStats]);
 
-  function handleLogin() {
+  const handleLogin = useCallback(() => {
     if (!inputName.trim()) {
       setLoginMessage("Voer je naam in.");
       if (nameInputRef.current) nameInputRef.current.focus();
@@ -233,15 +249,15 @@ export default function SneltoetsTrein() {
     } else {
       setLoginMessage("Wachtwoord klopt niet.");
     }
-  }
+  }, [inputName, password]);
 
-  function resetGame() {
+  const resetGame = useCallback(() => {
     setStep(-1);
     setPoints(0);
     setPerQuestionStats([]);
     setRanking(null);
     setVerbetering(null);
-  }
+  }, []);
 
   if (!loggedIn) {
     return (
@@ -261,7 +277,7 @@ export default function SneltoetsTrein() {
             className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-gray-600"
             aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
           >
-            {showPassword ? "👁️" : "🙈"}
+            {showPassword ? "Show" : "Hide"}
           
         
         
@@ -274,10 +290,9 @@ export default function SneltoetsTrein() {
   if (step === -1) {
     return (
       
-        Welkom bij de SneltoetsTrein 🚄
+        Welkom bij de SneltoetsTrein
         In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!
         Toetscombinaties die je gaat oefenen:
-        
         
             
                 
@@ -296,20 +311,18 @@ export default function SneltoetsTrein() {
                 
             
         
-
          setStep(0)}
           className="mt-6 bg-[#003082] text-white px-4 py-2 rounded"
           aria-label="Start de oefening"
         >
           Start de oefening
         
-
         
-          🏆 Alle scores:
+          Alle scores:
           
             {leaderboard.map((entry, index) => (
               
-                {index + 1}. {entry.name} – {entry.score} punten
+                {index + 1}. {entry.name} - {entry.score} punten
               
             ))}
           
@@ -322,7 +335,7 @@ export default function SneltoetsTrein() {
     return (
       
         Gefeliciteerd!
-        Je hebt de SneltoetsTrein op tijd het station laten bereiken. 🚉
+        Je hebt de SneltoetsTrein op tijd het station laten bereiken.
         
           Totale score: {points} van de maximale {QUESTIONS.length * 15}
         
@@ -342,7 +355,7 @@ export default function SneltoetsTrein() {
                             
                                 {index + 1}
                                 {stat.vraag}
-                                Tijd: {stat.tijd}s – Punten: {stat.punten}
+                                Tijd: {stat.tijd}s - Punten: {stat.punten}
                             
                         ))}
                     
@@ -350,11 +363,11 @@ export default function SneltoetsTrein() {
            
         
         
-          🏆 Top 5 Scores:
+          Top 5 Scores:
           
             {leaderboard.slice(0, 5).map((entry, index) => (
               
-                {index + 1}. {entry.name} – {entry.score} punten
+                {index + 1}. {entry.name} - {entry.score} punten
               
             ))}
           
@@ -378,48 +391,20 @@ export default function SneltoetsTrein() {
           
         
         
-          🚂💨
+          Train
+          Fast
         
-        🚉 Station
+        Station
       
-      {`
-        @keyframes puff {
-          0% { opacity: 0; transform: scale(0.5) translateY(10px); }
-          50% { opacity: 1; transform: scale(1.2) translateY(-5px); }
-          100% { opacity: 0; transform: scale(1) translateY(-20px); }
-        }
-        .animate-puff {
-          animation: puff 0.6s ease-out;
-        }
-      `}
+      {`@keyframes puff { 0% { opacity: 0; transform: scale(0.5) translateY(10px); } 50% { opacity: 1; transform: scale(1.2) translateY(-5px); } 100% { opacity: 0; transform: scale(1) translateY(-20px); } } .animate-puff { animation: puff 0.6s ease-out; }`}
 
       SneltoetsTrein
       Vraag {step + 1} van {questions.length}
       Druk op de sneltoets voor: {current?.description}
       {gameMessage && {gameMessage}}
       
-      
         Speel opnieuw!
       
     
   );
 }
-```
-
-[1] https://stackoverflow.com/questions/75773036/having-issue-while-migrating-javascript-to-typescript-react-component
-[2] https://stackoverflow.com/questions/79296528/errors-while-starting-vite-react
-[3] https://github.com/evanw/esbuild/issues/2048
-[4] https://github.com/vercel/next.js/issues/72878
-[5] https://www.reddit.com/r/vuejs/comments/1brioqs/typescript_file_wont_compile_says_expected_but/
-[6] https://laracasts.com/discuss/channels/inertia/vite-bilde-note-resolve-script-setup-langts
-[7] https://github.com/slidevjs/slidev/issues/1844
-[8] https://stackoverflow.com/questions/76684190/typescript-errors-with-build-command-in-vite/76684215
-[9] https://stackoverflow.com/questions/70397360/react-cant-resolve-tsx-files/70658062
-[10] https://github.com/vitejs/vite/issues/2659
-[11] https://mattermost.com/blog/using-react-with-typescript/
-[12] https://esbuild.github.io/api/
-[13] https://www.reddit.com/r/node/comments/1cyy103/anyone_familiar_with_debugging_vite_build_errors/
-[14] https://discourse.aurelia.io/t/method-decorator-does-not-work-with-vite/5434
-[15] https://www.reddit.com/r/reactjs/comments/12mo1qm/vite_doesnt_show_typescript_errorswarning_until/
-[16] https://github.com/vitejs/vite/discussions/12870
-[17] https://vite.dev/guide/troubleshooting
