@@ -269,33 +269,70 @@ export default function SneltoetsTrein() {
 
   if (!loggedIn) {
     return (
-      <div style={{ maxWidth: '400px', margin: '0 auto', padding: '1rem' }}>
-        {loginMessage && <p>{loginMessage}</p>}
-        <h1>SneltoetsTrein Login</h1>
-        <input
-          type="text"
-          value={inputName}
-          onChange={(e) => setInputName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-          aria-label="Vul je naam in"
-          ref={nameInputRef}
-        />
-        <input
-          type={showPassword ? "text" : "password"}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-          aria-label="Vul wachtwoord in"
-        />
-        <button
-          onClick={() => setShowPassword(!showPassword)}
-          aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
-          type="button"
-        >
-          {showPassword ? "👁️" : "🙈"}
-        </button>
-        <button onClick={handleLogin}>Inloggen</button>
-      </div>
+<div style={{ maxWidth: '400px', margin: '0 auto', padding: '1rem' }}>
+  {loginMessage && <p style={{ color: 'red' }}>{loginMessage}</p>}
+  <h1>SneltoetsTrein Login</h1>
+
+  <div style={{ marginBottom: '1rem', textAlign: 'left' }}>
+    <label htmlFor="naam" style={{ display: 'block', marginBottom: '0.25rem' }}>Naam</label>
+    <input
+      id="naam"
+      type="text"
+      value={inputName}
+      onChange={(e) => setInputName(e.target.value)}
+      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+      aria-label="Vul je naam in"
+      ref={nameInputRef}
+      placeholder="Jouw naam"
+      style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+    />
+  </div>
+
+  <div style={{ marginBottom: '1rem', textAlign: 'left', position: 'relative' }}>
+    <label htmlFor="wachtwoord" style={{ display: 'block', marginBottom: '0.25rem' }}>Wachtwoord</label>
+    <input
+      id="wachtwoord"
+      type={showPassword ? "text" : "password"}
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+      aria-label="Vul wachtwoord in"
+      placeholder="Wachtwoord"
+      style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+    />
+    <button
+      onClick={() => setShowPassword(!showPassword)}
+      aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
+      type="button"
+      style={{
+        position: 'absolute',
+        right: '8px',
+        top: '32px',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '1.2em'
+      }}
+      tabIndex={-1}
+    >
+      {showPassword ? "👁️" : "🙈"}
+    </button>
+  </div>
+
+  <button onClick={handleLogin} style={{
+    width: '100%',
+    background: '#003082',
+    color: '#fff',
+    padding: '10px',
+    border: 'none',
+    borderRadius: '4px',
+    fontSize: '1em',
+    cursor: 'pointer'
+  }}>
+    Inloggen
+  </button>
+</div>
+
     );
   }
 
