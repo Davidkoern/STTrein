@@ -1,3 +1,14 @@
+Uiteraard! Hier is de volledig aangepaste code waarin alle gevraagde wijzigingen zijn doorgevoerd.
+
+### Samenvatting van de aanpassingen:
+1.  **Foutmelding:** Bij een tweede foute invoer verschijnt nu de tekst: "Fout, het antwoord is '[antwoord]'. We gaan nu naar de volgende vraag.", waarna het spel direct doorgaat.
+2.  **Eindscore Tabel:** Het overzicht per vraag aan het einde van het spel wordt nu weergegeven in een gecentreerde tabel met drie kolommen: Vraagnummer, Opdracht, en Resultaat (Tijd & Punten).
+3.  **Centreren:** Zowel de tabel op de startpagina als de eindscore-tabel zijn nu netjes in het midden van de pagina gecentreerd.
+4.  **Speel Opnieuw Knop:** Tijdens het spelen is er nu een "Speel opnieuw!" knop zichtbaar, waarmee je het spel op elk moment kunt herstarten. Hiervoor is een `resetGame` functie gemaakt om de code schoon te houden.
+
+Hieronder vind je de volledig bijgewerkte code.
+
+```tsx
 import { useState, useEffect, useMemo, useRef } from "react";
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
@@ -43,7 +54,7 @@ const QUESTIONS: Question[] = BASE_QUESTIONS.map(q => ({
 }));
 
 
-function shuffleArray<T>(array: T[]): T[] {
+function shuffleArray(array: T[]): T[] {
   const newArr = [...array];
   for (let i = newArr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -81,25 +92,19 @@ export default function SneltoetsTrein() {
   const [gameMessage, setGameMessage] = useState("");
   const [locked, setLocked] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [perQuestionStats, setPerQuestionStats] = useState<PerQuestionStat[]>([]);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [ranking, setRanking] = useState<number | null>(null);
-  const [verbetering, setVerbetering] = useState<number | null>(null);
+  const [perQuestionStats, setPerQuestionStats] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [ranking, setRanking] = useState(null);
+  const [verbetering, setVerbetering] = useState(null);
 
-  const startRef = useRef<number>(Date.now());
+  const startRef = useRef(Date.now());
   const loginTimeRef = useRef(0);
   const attemptsRef = useRef(0);
   const readyRef = useRef(true);
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef(null);
 
   const current = useMemo(() => {
-    if (step >= 0 && step < questions.length) {
-      return questions[step];
-    }
-    return null;
-  }, [questions, step]);
-
-  useEffect(() => {
+    if (step >= 0 && step  {
     document.body.style.backgroundColor = '#FFC917';
     document.body.style.color = '#003082';
     document.body.style.textAlign = 'center';
@@ -113,13 +118,7 @@ export default function SneltoetsTrein() {
   }, [loggedIn]);
 
   useEffect(() => {
-    if (loggedIn && step >= 0 && step < questions.length) {
-      readyRef.current = true;
-      attemptsRef.current = 0;
-      setGameMessage("");
-      startRef.current = Date.now();
-
-      const handler = (e: KeyboardEvent) => {
+    if (loggedIn && step >= 0 && step  {
         if (!readyRef.current || processing || locked || !current) return;
         if (["Control", "Alt", "Meta", "Shift"].includes(e.key)) return;
         e.preventDefault();
@@ -157,7 +156,7 @@ export default function SneltoetsTrein() {
           if (attemptsRef.current >= 2) {
             setLocked(true);
             setProcessing(true);
-            setGameMessage(`Antwoord: ${current.displayCombo}`);
+            setGameMessage(`Fout, het antwoord is '${current.displayCombo}'. We gaan nu naar de volgende vraag.`);
 
             setTimeout(() => {
               setPerQuestionStats((prev) => [...prev, {
@@ -246,162 +245,154 @@ export default function SneltoetsTrein() {
     }
   }
 
+  function resetGame() {
+    setStep(-1);
+    setPoints(0);
+    setPerQuestionStats([]);
+    setRanking(null);
+    setVerbetering(null);
+  }
+
   if (!loggedIn) {
     return (
-      <div className="p-4 max-w-sm mx-auto text-center">
-        {loginMessage && <p className="text-red-600 mb-2 font-semibold">{loginMessage}</p>}
-        <h1 className="text-xl font-bold mb-4">SneltoetsTrein Login</h1>
-        <input
-          ref={nameInputRef}
-          type="text"
-          placeholder="Naam"
-          className="w-full mb-2 border px-2 py-1"
-          value={inputName}
-          onChange={(e) => setInputName(e.target.value)}
+      
+        {loginMessage && {loginMessage}}
+        SneltoetsTrein Login
+         setInputName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
           aria-label="Vul je naam in"
         />
-        <div className="relative mb-2">
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Wachtwoord"
-            className="w-full border px-2 py-1 pr-10"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+        
+           setPassword(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
             aria-label="Vul wachtwoord in"
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
+           setShowPassword(!showPassword)}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-gray-600"
             aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
           >
             {showPassword ? "👁️" : "🙈"}
-          </button>
-        </div>
-        <button
-          className="bg-[#003082] text-white px-4 py-2 w-full"
-          onClick={handleLogin}
-          aria-label="Inloggen"
-        >
+          
+        
+        
           Inloggen
-        </button>
-      </div>
+        
+      
     );
   }
 
   if (step === -1) {
     return (
-      <div className="p-4 max-w-2xl mx-auto text-[#003082] text-center">
-        <h1 className="text-3xl font-bold mb-4 text-[#FFC917]">Welkom bij de SneltoetsTrein 🚄</h1>
-        <p className="mb-4">In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!</p>
-        <h2 className="text-xl font-semibold mb-2 text-[#003082]">Toetscombinaties die je gaat oefenen:</h2>
+      
+        Welkom bij de SneltoetsTrein 🚄
+        In dit spel oefen je handige sneltoetsen. Je krijgt steeds een opdracht en drukt dan de bijbehorende toetsencombinatie in. De trein rijdt een stukje verder bij elk goed antwoord. Hoe sneller je antwoordt, hoe meer punten je verdient!
+        Toetscombinaties die je gaat oefenen:
         
-        <div className="overflow-x-auto">
-            <table className="w-full text-left mx-auto max-w-lg border-collapse mt-4">
-                <thead>
-                    <tr>
-                        <th className="p-2 border-b-2 border-[#003082] font-bold">Sneltoets</th>
-                        <th className="p-2 border-b-2 border-[#003082] font-bold">Beschrijving</th>
-                    </tr>
-                </thead>
-                <tbody>
+        
+            
+                
+                    
+                        Sneltoets
+                        Beschrijving
+                    
+                
+                
                     {QUESTIONS.map((q, i) => (
-                        <tr key={i} className="border-b border-[#003082]/30">
-                            <td className="p-2 align-top whitespace-nowrap"><strong>{q.displayCombo}</strong></td>
-                            <td className="p-2 align-top">{q.description}</td>
-                        </tr>
+                        
+                            {q.displayCombo}
+                            {q.description}
+                        
                     ))}
-                </tbody>
-            </table>
-        </div>
+                
+            
+        
 
-        <button
-          onClick={() => setStep(0)}
+         setStep(0)}
           className="mt-6 bg-[#003082] text-white px-4 py-2 rounded"
           aria-label="Start de oefening"
         >
           Start de oefening
-        </button>
+        
 
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Alle scores:</h2>
-          <ul className="list-none p-0">
+        
+          🏆 Alle scores:
+          
             {leaderboard.map((entry, index) => (
-              <li key={index} className="border-b py-1">
+              
                 {index + 1}. {entry.name} – {entry.score} punten
-              </li>
+              
             ))}
-          </ul>
-        </div>
-      </div>
+          
+        
+      
     );
   }
 
   if (step >= questions.length) {
     return (
-      <div className="p-4 text-center">
-        <h1 className="text-2xl font-bold text-[#003082]">Gefeliciteerd!</h1>
-        <p>Je hebt de SneltoetsTrein op tijd het station laten bereiken. 🚉</p>
-        <p className="mb-4 text-[#FFC917] font-semibold">
+      
+        Gefeliciteerd!
+        Je hebt de SneltoetsTrein op tijd het station laten bereiken. 🚉
+        
           Totale score: {points} van de maximale {QUESTIONS.length * 15}
-        </p>
-        <div className="text-center max-w-xl mx-auto">
-          <h2 className="text-xl font-semibold mb-2 text-[#003082]">Overzicht per vraag:</h2>
-          <ul className="list-none p-0">
-            {perQuestionStats.map((stat, index) => (
-              <li key={index} className="border-b py-1">
-                <strong>Vraag {index + 1}:</strong> {stat.vraag}<br />
-                Tijd: {stat.tijd} sec – Punten: {stat.punten}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="text-center max-w-xl mx-auto mt-6">
-          <h2 className="text-xl font-semibold mb-2 text-[#003082]">🏆 Top 5 Scores:</h2>
-          <ul className="list-none p-0">
+        
+        
+          Overzicht per vraag:
+           
+                
+                    
+                        
+                            Vraag
+                            Opdracht
+                            Resultaat
+                        
+                    
+                    
+                        {perQuestionStats.map((stat, index) => (
+                            
+                                {index + 1}
+                                {stat.vraag}
+                                Tijd: {stat.tijd}s – Punten: {stat.punten}
+                            
+                        ))}
+                    
+                
+           
+        
+        
+          🏆 Top 5 Scores:
+          
             {leaderboard.slice(0, 5).map((entry, index) => (
-              <li key={index} className="border-b py-1">
+              
                 {index + 1}. {entry.name} – {entry.score} punten
-              </li>
+              
             ))}
-          </ul>
+          
           {ranking && (
-            <p className="mt-4 text-lg font-semibold text-[#003082]">
+            
               Gefeliciteerd, je bent nummer {ranking} van Legal!
-            </p>
+            
           )}
-        </div>
-        <button
-          className="mt-8 bg-[#003082] text-white px-4 py-2 rounded"
-          onClick={() => {
-            setStep(-1);
-            setPoints(0);
-            setPerQuestionStats([]);
-            setRanking(null);
-            setVerbetering(null);
-          }}
-          aria-label="Speel opnieuw"
-        >
+        
+        
           Speel opnieuw!
-        </button>
-      </div>
+        
+      
     );
   }
 
   return (
-    <div className="p-4 max-w-xl mx-auto text-[#003082] text-center">
-      <div className="relative w-full h-32 bg-[#003082] mb-6 overflow-hidden rounded-xl">
-        <div className="absolute bottom-2 left-0 right-0 h-2 bg-[#FFC917] bg-opacity-50">
-          <div className="absolute top-0 left-0 h-2 bg-[#FFC917] transition-all duration-700" style={{ width: `${(step / questions.length) * 100}%` }} />
-        </div>
-        <div className="absolute bottom-4 left-0 transition-transform duration-700 flex items-end" style={{ transform: `translateX(${(step / questions.length) * 90}%)` }}>
-          🚂<span className="ml-1 animate-puff text-xl">💨</span>
-        </div>
-        <div className="absolute bottom-0 right-0 mr-2 text-sm">🚉 Station</div>
-      </div>
-      <style>{`
+    
+      
+        
+          
+        
+        
+          🚂💨
+        
+        🚉 Station
+      
+      {`
         @keyframes puff {
           0% { opacity: 0; transform: scale(0.5) translateY(10px); }
           50% { opacity: 1; transform: scale(1.2) translateY(-5px); }
@@ -410,12 +401,17 @@ export default function SneltoetsTrein() {
         .animate-puff {
           animation: puff 0.6s ease-out;
         }
-      `}</style>
+      `}
 
-      <h1 className="text-2xl font-bold mb-4 text-[#FFC917]">SneltoetsTrein</h1>
-      <p className="mb-2 text-[#FFC917] font-semibold">Vraag {step + 1} van {questions.length}</p>
-      <p className="mb-4">Druk op de sneltoets voor: <strong>{current?.description}</strong></p>
-      {gameMessage && <p className="mt-2 text-lg">{gameMessage}</p>}
-    </div>
+      SneltoetsTrein
+      Vraag {step + 1} van {questions.length}
+      Druk op de sneltoets voor: {current?.description}
+      {gameMessage && {gameMessage}}
+      
+      
+        Speel opnieuw!
+      
+    
   );
 }
+```
