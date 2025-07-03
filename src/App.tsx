@@ -1,14 +1,3 @@
-Uiteraard! Hier is de volledig aangepaste code waarin alle gevraagde wijzigingen zijn doorgevoerd.
-
-### Samenvatting van de aanpassingen:
-1.  **Foutmelding:** Bij een tweede foute invoer verschijnt nu de tekst: "Fout, het antwoord is '[antwoord]'. We gaan nu naar de volgende vraag.", waarna het spel direct doorgaat.
-2.  **Eindscore Tabel:** Het overzicht per vraag aan het einde van het spel wordt nu weergegeven in een gecentreerde tabel met drie kolommen: Vraagnummer, Opdracht, en Resultaat (Tijd & Punten).
-3.  **Centreren:** Zowel de tabel op de startpagina als de eindscore-tabel zijn nu netjes in het midden van de pagina gecentreerd.
-4.  **Speel Opnieuw Knop:** Tijdens het spelen is er nu een "Speel opnieuw!" knop zichtbaar, waarmee je het spel op elk moment kunt herstarten. Hiervoor is een `resetGame` functie gemaakt om de code schoon te houden.
-
-Hieronder vind je de volledig bijgewerkte code.
-
-```tsx
 import { useState, useEffect, useMemo, useRef } from "react";
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
