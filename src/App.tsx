@@ -404,3 +404,14 @@ export default function SneltoetsTrein() {
   );
 }
 ```
+
+[1] https://github.com/slidevjs/slidev/issues/1844
+[2] https://github.com/evanw/esbuild/issues/3049
+[3] https://stackoverflow.com/questions/79055670/vite-vue3-error-expected-but-found-setup-when-using-lang-ts
+[4] https://github.com/vitejs/vite/issues/2659
+[5] https://stackoverflow.com/questions/79296528/errors-while-starting-vite-react
+[6] https://www.reddit.com/r/reactjs/comments/1hieo6s/error_while_creating_react_project/
+[7] https://www.reddit.com/r/vuejs/comments/1brioqs/typescript_file_wont_compile_says_expected_but/
+[8] https://stackoverflow.com/questions/60438275/react-typescript-error-parsing-error-expected/60438585
+[9] https://laracasts.com/discuss/channels/inertia/vite-bilde-note-resolve-script-setup-langts
+[10] https://github.com/evanw/esbuild/issues/3016
