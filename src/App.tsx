@@ -99,7 +99,6 @@ export default function SneltoetsTrein() {
   const readyRef = useRef(true);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
-  // HIER IS DE FOUT GECORRIGEERD
   const current = useMemo(() => {
     if (step >= 0 && step < questions.length) {
       return questions[step];
@@ -332,7 +331,6 @@ export default function SneltoetsTrein() {
     Inloggen
   </button>
 </div>
-
     );
   }
 
@@ -396,7 +394,7 @@ export default function SneltoetsTrein() {
             {perQuestionStats.map((stat, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
-                <td>{stat.vraag}</td>
+                <td><strong>{stat.vraag}</strong></td>
                 <td>Tijd: {stat.tijd}s – Punten: {stat.punten}</td>
               </tr>
             ))}
@@ -418,6 +416,7 @@ export default function SneltoetsTrein() {
     );
   }
 
+  // HIER WORDT DE OPDRACHT DIKGEDRUKT WEERGEGEVEN
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
       <h1>🚂💨</h1>
@@ -434,7 +433,7 @@ export default function SneltoetsTrein() {
       `}</style>
       <p>SneltoetsTrein</p>
       <p>Vraag {step + 1} van {questions.length}</p>
-      <p>Druk op de sneltoets voor: {current?.description}</p>
+      <p>Druk op de sneltoets voor: <strong>{current?.description}</strong></p>
       {gameMessage && <p>{gameMessage}</p>}
       <button onClick={resetGame}>Speel opnieuw!</button>
     </div>
